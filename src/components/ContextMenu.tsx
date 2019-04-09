@@ -20,11 +20,14 @@ function ContextMenu({ anchor, menu }: Props) {
   const [anchorElement, setAnchorElement] = React.useState<HTMLElement | null>(null)
   const [isOpen, setOpenState] = React.useState(false)
 
-  const show = (event: React.SyntheticEvent<HTMLElement>) => {
-    setAnchorElement(event.currentTarget)
-    setOpenState(true)
-  }
-  const hide = () => setOpenState(false)
+  const show = React.useCallback(
+    (event: React.SyntheticEvent<HTMLElement>) => {
+      setAnchorElement(event.currentTarget)
+      setOpenState(true)
+    },
+    [setAnchorElement, setOpenState]
+  )
+  const hide = React.useCallback(() => setOpenState(false), [setOpenState])
 
   const closeAndCall = (fn: () => void) => {
     return () => {

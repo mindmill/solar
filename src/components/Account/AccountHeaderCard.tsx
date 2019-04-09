@@ -29,6 +29,16 @@ enum DialogID {
   renameAccount
 }
 
+const ContextMenuAnchor = React.memo(function ContextMenuAnchor(props: {
+  onOpen: (event: React.SyntheticEvent<any>) => void
+}) {
+  return (
+    <IconButton color="inherit" onClick={props.onOpen} style={{ marginRight: -16, fontSize: 32 }}>
+      <MoreVertIcon style={{ fontSize: "inherit" }} />
+    </IconButton>
+  )
+})
+
 function PasswordStatus(props: { safe: boolean; style?: React.CSSProperties }) {
   return (
     <Tooltip title={props.safe ? "Password protected" : "No password"}>
@@ -128,11 +138,7 @@ function AccountHeaderCard(props: Props) {
                 onManageSigners={props.onManageSigners}
                 onRename={() => setOpenDialog(DialogID.renameAccount)}
               >
-                {({ onOpen }) => (
-                  <IconButton color="inherit" onClick={onOpen} style={{ marginRight: -16, fontSize: 32 }}>
-                    <MoreVertIcon style={{ fontSize: "inherit" }} />
-                  </IconButton>
-                )}
+                {({ onOpen }) => <ContextMenuAnchor onOpen={onOpen} />}
               </AccountContextMenu>
             </>
           }
