@@ -1,5 +1,6 @@
 /// <reference types="parcel-env" />
 
+import FastClick from "fastclick"
 import React from "react"
 import ReactDOM from "react-dom"
 import { HashRouter as Router, Route, Switch } from "react-router-dom"
@@ -92,3 +93,16 @@ setTimeout(() => {
     }, 1000)
   }
 }, 1000)
+
+// Prevent click delay on iOS
+if (process.env.PLATFORM === "ios") {
+  // tslint:disable-next-line no-console
+  console.log("Registering fastclick...")
+  document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+      FastClick(document.body)
+    },
+    false
+  )
+}
