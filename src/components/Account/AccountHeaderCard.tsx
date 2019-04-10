@@ -11,7 +11,7 @@ import SwapHorizIcon from "@material-ui/icons/SwapHoriz"
 import VerifiedUserIcon from "@material-ui/icons/VerifiedUser"
 import { Account, AccountsContext, AccountsContextType } from "../../context/accounts"
 import { SettingsContext } from "../../context/settings"
-import { useAccountData, useRouter } from "../../hooks"
+import { useAccountData, useRouter, ObservedAccountData } from "../../hooks"
 import * as routes from "../../routes"
 import { primaryBackgroundColor } from "../../theme"
 import BackButton from "../BackButton"
@@ -55,6 +55,21 @@ function TestnetBadge(props: { style?: React.CSSProperties }) {
   return <span style={style}>Testnet</span>
 }
 
+// tslint:disable-next-line no-shadowed-variable
+const Badges = React.memo(function Badges(props: { account: Account; signers: ObservedAccountData["signers"] }) {
+  return (
+    <HorizontalLayout display="inline-flex" alignItems="center" width="auto" fontSize="1.5rem">
+      {props.account.testnet ? <TestnetBadge style={{ marginRight: 16 }} /> : null}
+      {props.signers.length > 1 ? (
+        <Tooltip title="Multi-Signature Account">
+          <GroupIcon style={{ fontSize: "120%", marginRight: 8 }} />
+        </Tooltip>
+      ) : null}
+      <PasswordStatus safe={props.account.requiresPassword} style={{ fontSize: "90%", marginTop: "-0.05em" }} />
+    </HorizontalLayout>
+  )
+})
+
 interface Props {
   account: Account
   children?: React.ReactNode
@@ -96,15 +111,7 @@ function AccountHeaderCard(props: Props) {
           >
             {props.account.name}
           </Typography>
-          <HorizontalLayout display="inline-flex" alignItems="center" width="auto" fontSize="1.5rem">
-            {props.account.testnet ? <TestnetBadge style={{ marginRight: 16 }} /> : null}
-            {accountData.signers.length > 1 ? (
-              <Tooltip title="Multi-Signature Account">
-                <GroupIcon style={{ fontSize: "120%", marginRight: 8 }} />
-              </Tooltip>
-            ) : null}
-            <PasswordStatus safe={props.account.requiresPassword} style={{ fontSize: "90%", marginTop: "-0.05em" }} />
-          </HorizontalLayout>
+          <Badges account={props.account} signers={accountData.signers} />
           <Box grow style={{ textAlign: "right" }}>
             <Button
               color="secondary"
