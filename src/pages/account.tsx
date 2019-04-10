@@ -26,12 +26,19 @@ import CreatePaymentDialog from "../components/Payment/CreatePaymentDialog"
 import { Account, AccountsContext } from "../context/accounts"
 import { SettingsContext } from "../context/settings"
 import { SignatureDelegationContext } from "../context/signatureDelegation"
-import { useIsMobile, useAccountData, useHorizon, useRecentTransactions, useRouter } from "../hooks"
+import {
+  useIsMobile,
+  useAccountData,
+  useHorizon,
+  useRecentTransactions,
+  useRouter,
+  ObservedAccountData
+} from "../hooks"
 import { hasSigned } from "../lib/transaction"
 import * as routes from "../routes"
 
 interface AccountActionsProps {
-  account: Account
+  accountData: ObservedAccountData
   bottomOfScreen?: boolean
   horizontalMargin: number
   onCreatePayment: () => void
@@ -40,8 +47,8 @@ interface AccountActionsProps {
   style?: React.CSSProperties
 }
 
-function AccountActions(props: AccountActionsProps) {
-  const accountData = useAccountData(props.account.publicKey, props.account.testnet)
+// tslint:disable-next-line no-shadowed-variable
+const AccountActions = React.memo(function AccountActions(props: AccountActionsProps) {
   const buttonStyle = {
     border: "none",
     borderRadius: props.squareButtons ? 0 : undefined,
@@ -69,7 +76,7 @@ function AccountActions(props: AccountActionsProps) {
       <Button
         color="primary"
         variant="contained"
-        disabled={!accountData.activated}
+        disabled={!props.accountData.activated}
         onClick={props.onCreatePayment}
         style={buttonStyle}
       >
@@ -79,34 +86,38 @@ function AccountActions(props: AccountActionsProps) {
       </Button>
     </HorizontalLayout>
   )
-}
+})
 
 function PendingMultisigTransactions(props: { account: Account }) {
   const { pendingSignatureRequests } = React.useContext(SignatureDelegationContext)
-  return (
-    <>
-      <InteractiveSignatureRequestList
-        account={props.account}
-        icon={<DoneAllIcon />}
-        signatureRequests={pendingSignatureRequests.filter(
-          request =>
-            request._embedded.signers.some(signer => signer.account_id === props.account.publicKey) &&
-            !hasSigned(request.meta.transaction, props.account.publicKey)
-        )}
-        title="Transactions to co-sign"
-      />
-      <InteractiveSignatureRequestList
-        account={props.account}
-        icon={<UpdateIcon style={{ opacity: 0.5 }} />}
-        signatureRequests={pendingSignatureRequests.filter(
-          request =>
-            request._embedded.signers.some(signer => signer.account_id === props.account.publicKey) &&
-            hasSigned(request.meta.transaction, props.account.publicKey)
-        )}
-        title="Awaiting additional signatures"
-      />
-    </>
+  const rendered = React.useMemo(
+    () => (
+      <>
+        <InteractiveSignatureRequestList
+          account={props.account}
+          icon={<DoneAllIcon />}
+          signatureRequests={pendingSignatureRequests.filter(
+            request =>
+              request._embedded.signers.some(signer => signer.account_id === props.account.publicKey) &&
+              !hasSigned(request.meta.transaction, props.account.publicKey)
+          )}
+          title="Transactions to co-sign"
+        />
+        <InteractiveSignatureRequestList
+          account={props.account}
+          icon={<UpdateIcon style={{ opacity: 0.5 }} />}
+          signatureRequests={pendingSignatureRequests.filter(
+            request =>
+              request._embedded.signers.some(signer => signer.account_id === props.account.publicKey) &&
+              hasSigned(request.meta.transaction, props.account.publicKey)
+          )}
+          title="Awaiting additional signatures"
+        />
+      </>
+    ),
+    [pendingSignatureRequests, props.account]
   )
+  return rendered
 }
 
 function Transactions(props: { account: Account }) {
@@ -161,16 +172,27 @@ interface Props {
 
 function AccountPage(props: Props) {
   const { accounts, renameAccount } = React.useContext(AccountsContext)
-  const router = useRouter()
-
-  const isSmallScreen = useIsMobile()
-  const onCloseDialog = () => router.history.push(routes.account(props.accountID))
 
   const account = accounts.find(someAccount => someAccount.id === props.accountID)
   if (!account) {
-    // FIXME: Use error boundaries
-    return <div>Wallet account not found. ID: {props.accountID}</div>
+    throw new Error(`Wallet account not found. ID: ${props.accountID}`)
   }
+
+  const accountData = useAccountData(account.publicKey, account.testnet)
+  const isSmallScreen = useIsMobile()
+  const router = useRouter()
+
+  const { onCloseDialog, onCreatePayment, onReceivePayment } = React.useMemo(
+    () => ({
+      onCloseDialog: () => router.history.push(routes.account(props.accountID)),
+      onCreatePayment: () => router.history.push(routes.createPayment(props.accountID)),
+      onReceivePayment: () => router.history.push(routes.receivePayment(props.accountID))
+    }),
+    [props.accountID]
+  )
+
+  const topActionsStyle = React.useMemo(() => ({ marginTop: 40 }), [])
+  const bottomActionsStyle = React.useMemo(() => ({ boxShadow: "0 -8px 16px 0 rgba(0, 0, 0, 0.1)", zIndex: 1 }), [])
 
   return (
     <VerticalLayout height="100%">
@@ -186,11 +208,11 @@ function AccountPage(props: Props) {
           </AccountBalancesContainer>
           {isSmallScreen ? null : (
             <AccountActions
-              account={account}
+              accountData={accountData}
               horizontalMargin={40}
-              onCreatePayment={() => router.history.push(routes.createPayment(props.accountID))}
-              onReceivePayment={() => router.history.push(routes.receivePayment(props.accountID))}
-              style={{ marginTop: 40 }}
+              onCreatePayment={onCreatePayment}
+              onReceivePayment={onReceivePayment}
+              style={topActionsStyle}
             />
           )}
         </AccountHeaderCard>
@@ -204,13 +226,13 @@ function AccountPage(props: Props) {
       </Section>
       {isSmallScreen ? (
         <AccountActions
-          account={account}
+          accountData={accountData}
           bottomOfScreen
           horizontalMargin={0}
-          onCreatePayment={() => router.history.push(routes.createPayment(props.accountID))}
-          onReceivePayment={() => router.history.push(routes.receivePayment(props.accountID))}
+          onCreatePayment={onCreatePayment}
+          onReceivePayment={onReceivePayment}
           squareButtons
-          style={{ boxShadow: "0 -8px 16px 0 rgba(0, 0, 0, 0.1)", zIndex: 1 }}
+          style={bottomActionsStyle}
         />
       ) : null}
 
