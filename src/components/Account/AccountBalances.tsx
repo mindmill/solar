@@ -97,7 +97,8 @@ interface MultipleBalancesProps {
   inline?: boolean
 }
 
-export function MultipleBalances(props: MultipleBalancesProps) {
+// tslint:disable-next-line no-shadowed-variable
+export const MultipleBalances = React.memo(function MultipleBalances(props: MultipleBalancesProps) {
   if (props.balances.length === 0) {
     return <></>
   }
@@ -125,7 +126,7 @@ export function MultipleBalances(props: MultipleBalancesProps) {
       ))}
     </>
   )
-}
+})
 
 const zeroXLMBalance = {
   asset_type: "native",
