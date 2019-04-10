@@ -28,25 +28,31 @@ function SignatureRequestListItem(props: SignatureRequestListItemProps) {
   const onOpen = onOpenTransaction
     ? () => onOpenTransaction(signatureRequest.meta.transaction, signatureRequest)
     : undefined
+
+  const hoverActions = React.useMemo(
+    () => (
+      <Typography component="div" color="textPrimary" style={{ display: "inline-flex", alignItems: "stretch" }}>
+        <Button onClick={onDismiss} color="inherit" variant="contained">
+          Dismiss&nbsp;
+          <CloseIcon style={{ fontSize: "140%" }} />
+        </Button>
+        <span style={{ display: "inline-block", width: 16 }} />
+        <Button onClick={onOpen} color="primary" variant="contained">
+          Review&nbsp;
+          <ArrowForwardIcon style={{ fontSize: "140%" }} />
+        </Button>
+      </Typography>
+    ),
+    [onDismiss, onOpen]
+  )
+
   return (
     <TransactionListItem
       alwaysShowSource
       accountPublicKey={signatureRequest.meta.transaction.source}
       createdAt={signatureRequest.created_at}
       icon={props.icon}
-      hoverActions={
-        <Typography component="div" color="textPrimary" style={{ display: "inline-flex", alignItems: "stretch" }}>
-          <Button onClick={onDismiss} color="inherit" variant="contained">
-            Dismiss&nbsp;
-            <CloseIcon style={{ fontSize: "140%" }} />
-          </Button>
-          <span style={{ display: "inline-block", width: 16 }} />
-          <Button onClick={onOpen} color="primary" variant="contained">
-            Review&nbsp;
-            <ArrowForwardIcon style={{ fontSize: "140%" }} />
-          </Button>
-        </Typography>
-      }
+      hoverActions={hoverActions}
       style={props.style}
       transaction={signatureRequest.meta.transaction}
     />
@@ -72,6 +78,15 @@ export function SignatureRequestList(props: SignatureRequestListProps) {
     setPendingConfirmation(null)
   }
 
+  const itemStyle = React.useMemo(
+    () => ({
+      background: "#ffffff",
+      boxShadow: "0 8px 16px 0 rgba(0, 0, 0, 0.1)",
+      minHeight: 72
+    }),
+    []
+  )
+
   if (props.signatureRequests.length === 0) {
     return null
   }
@@ -89,11 +104,7 @@ export function SignatureRequestList(props: SignatureRequestListProps) {
             onDismissSignatureRequest={() => setPendingConfirmation(signatureRequest)}
             onOpenTransaction={props.onOpenTransaction}
             signatureRequest={signatureRequest}
-            style={{
-              background: "#ffffff",
-              boxShadow: "0 8px 16px 0 rgba(0, 0, 0, 0.1)",
-              minHeight: 72
-            }}
+            style={itemStyle}
           />
         ))}
       </List>
