@@ -11,7 +11,8 @@ interface BackButtonProps {
   style?: React.CSSProperties
 }
 
-const BackButton = (props: BackButtonProps) => {
+// tslinst:disable-next-line no-shadowed-variable
+const BackButton = React.memo(function BackButton(props: BackButtonProps) {
   const style = {
     padding: 6,
     fontSize: 32,
@@ -22,7 +23,7 @@ const BackButton = (props: BackButtonProps) => {
       <ArrowBackIcon style={{ fontSize: "inherit" }} />
     </IconButton>
   )
-}
+})
 
 interface Props {
   actions?: React.ReactNode
@@ -38,18 +39,25 @@ interface Props {
 function MainTitle(props: Props) {
   const isSmallScreen = useIsMobile()
   const isTitleOnSecondRow = isSmallScreen && props.actions && !props.hideBackButton
+
+  const backButtonStyle = React.useMemo(
+    () => ({
+      fontSize: 28,
+      flexGrow: 0,
+      flexShrink: 0,
+      marginLeft: -8,
+      marginRight: 8
+    }),
+    []
+  )
+
   return (
     <HorizontalLayout
       alignItems="center"
       wrap={isSmallScreen ? (props.hideBackButton ? "wrap-reverse" : "wrap") : "nowrap"}
       style={{ minHeight: isSmallScreen ? undefined : 56, ...props.style }}
     >
-      {props.hideBackButton ? null : (
-        <BackButton
-          onClick={props.onBack}
-          style={{ fontSize: 24, flexGrow: 0, flexShrink: 0, marginLeft: -8, marginRight: 8 }}
-        />
-      )}
+      {props.hideBackButton ? null : <BackButton onClick={props.onBack} style={backButtonStyle} />}
       <HorizontalLayout
         alignItems="center"
         grow={isSmallScreen ? 1 : undefined}
