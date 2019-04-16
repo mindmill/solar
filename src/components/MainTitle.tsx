@@ -61,10 +61,11 @@ function MainTitle(props: Props) {
           variant="h5"
           color={props.titleColor}
           style={{
+            display: "flex",
             flexGrow: 1,
             flexShrink: 1,
             fontSize: isSmallScreen ? 20 : 24,
-            marginRight: 12,
+            marginRight: props.actions || props.badges ? 12 : 0,
             minWidth: "40%",
             overflow: "hidden",
             textOverflow: "ellipsis",
@@ -76,9 +77,11 @@ function MainTitle(props: Props) {
         </Typography>
         {props.badges}
       </HorizontalLayout>
-      <Box grow style={{ textAlign: "right" }}>
-        {props.actions}
-      </Box>
+      {props.actions ? (
+        <Box grow style={{ textAlign: "right" }}>
+          {props.actions}
+        </Box>
+      ) : null}
     </HorizontalLayout>
   )
 }

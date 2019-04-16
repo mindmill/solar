@@ -13,10 +13,11 @@ import { useIsMobile, useIsSmallMobile } from "../../hooks"
 import { renderFormFieldError } from "../../lib/errors"
 import QRImportDialog from "../Dialog/QRImport"
 import QRCodeIcon from "../Icon/QRCode"
-import { Box, HorizontalLayout, VerticalLayout } from "../Layout/Box"
+import { HorizontalLayout, VerticalLayout } from "../Layout/Box"
 import { HorizontalMargin } from "../Layout/Spacing"
 import ToggleSection from "../Layout/ToggleSection"
 import ButtonIconLabel from "../ButtonIconLabel"
+import MainTitle from "../MainTitle"
 
 export interface AccountCreationValues {
   name: string
@@ -87,29 +88,39 @@ const AccountCreationForm = (props: AccountCreationFormProps) => {
   return (
     <form onSubmit={props.onSubmit}>
       <VerticalLayout minHeight="400px" justifyContent="space-between" style={{ marginLeft: -6, marginRight: 6 }}>
-        <Box>
-          <TextField
-            error={Boolean(errors.name)}
-            label={errors.name ? renderFormFieldError(errors.name) : undefined}
-            placeholder={props.testnet ? "New Testnet Account" : "New Account"}
-            autoFocus
-            margin="normal"
-            value={formValues.name}
-            onChange={event => setFormValue("name", event.target.value)}
-            InputProps={{
-              disableUnderline: true,
-              endAdornment: (
-                <InputAdornment position="end">
-                  <EditIcon />
-                </InputAdornment>
-              ),
-              style: {
-                fontSize: isTinyScreen ? "1.3rem" : "1.5rem"
-              }
-            }}
-            style={{ minWidth: isTinyScreen ? 230 : 300, maxWidth: "70%", margin: 0, paddingLeft: 12 }}
-          />
-        </Box>
+        <MainTitle
+          onBack={props.onCancel}
+          title={
+            <TextField
+              error={Boolean(errors.name)}
+              label={errors.name ? renderFormFieldError(errors.name) : undefined}
+              placeholder={props.testnet ? "New Testnet Account" : "New Account"}
+              autoFocus
+              margin="normal"
+              value={formValues.name}
+              onChange={event => setFormValue("name", event.target.value)}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end" style={{ pointerEvents: "none" }}>
+                    <EditIcon />
+                  </InputAdornment>
+                ),
+                style: {
+                  fontSize: isTinyScreen ? "1.3rem" : "1.5rem"
+                }
+              }}
+              style={{
+                minWidth: isTinyScreen ? 230 : 300,
+                maxWidth: isSmallScreen ? undefined : "70%",
+                margin: 0,
+                paddingLeft: 12
+              }}
+            />
+          }
+          style={{
+            marginLeft: 16
+          }}
+        />
         <ToggleSection
           checked={formValues.setPassword}
           onChange={() => setFormValue("setPassword", !formValues.setPassword as any)}
