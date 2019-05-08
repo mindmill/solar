@@ -35,6 +35,17 @@
         <resource-file src="res/icon/android/adaptiveicon/mipmap-xhdpi/ic_launcher.png" target="app/src/main/res/mipmap-xhdpi/ic_launcher.png" />
         <resource-file src="res/icon/android/adaptiveicon/mipmap-xxhdpi/ic_launcher.png" target="app/src/main/res/mipmap-xxhdpi/ic_launcher.png" />
         <resource-file src="res/icon/android/adaptiveicon/mipmap-xxxhdpi/ic_launcher.png" target="app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" />
+
+        <splash src="res/screen/android/splash-port-xxxhdpi.png" density="port-xxxhdpi"/>
+        <splash src="res/screen/android/splash-port-xxhdpi.png" density="port-xxhdpi"/>
+        <splash src="res/screen/android/splash-port-xhdpi.png" density="port-xhdpi"/>
+        <splash src="res/screen/android/splash-port-hdpi.png" density="port-hdpi"/>
+        <splash src="res/screen/android/splash-port-mdpi.png" density="port-mdpi"/>
+        <splash src="res/screen/android/splash-land-xxxhdpi.png" density="land-xxxhdpi"/>
+        <splash src="res/screen/android/splash-land-xxhdpi.png" density="land-xxhdpi"/>
+        <splash src="res/screen/android/splash-land-xhdpi.png" density="land-xhdpi"/>
+        <splash src="res/screen/android/splash-land-hdpi.png" density="land-hdpi"/>
+        <splash src="res/screen/android/splash-land-mdpi.png" density="land-mdpi"/>
     </platform>
     <platform name="ios">
         <allow-intent href="itms:*" />
