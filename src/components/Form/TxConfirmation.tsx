@@ -1,11 +1,13 @@
 import React from "react"
 import TextField from "@material-ui/core/TextField"
 import CheckIcon from "@material-ui/icons/Check"
+import CloseIcon from "@material-ui/icons/Close"
 import { Transaction } from "stellar-sdk"
 import { Account } from "../../context/accounts"
 import { renderFormFieldError } from "../../lib/errors"
+import { SettingsContext } from "../../context/settings"
 import { SignatureRequest } from "../../lib/multisig-service"
-import { ActionButton, DialogActionsBox } from "../Dialog/Generic"
+import { ActionButton, DialogActionsBox, ConfirmDialog } from "../Dialog/Generic"
 import { VerticalLayout } from "../Layout/Box"
 import TransactionSummary from "../TransactionSummary/TransactionSummary"
 
@@ -22,13 +24,17 @@ interface Props {
   signatureRequest?: SignatureRequest
   transaction: Transaction
   onConfirm?: (formValues: FormValues) => any
+  onDismiss?: () => void
 }
 
 function TxConfirmationForm(props: Props) {
+  const settings = React.useContext(SettingsContext)
+
   const { onConfirm = () => undefined } = props
 
   const [errors, setErrors] = React.useState<Partial<FormErrors>>({})
   const [formValues, setFormValues] = React.useState<FormValues>({ password: null })
+  const [pendingConfirmation, setPendingConfirmation] = React.useState<SignatureRequest | null>(null)
 
   const passwordError = props.passwordError || errors.password
 
@@ -37,6 +43,17 @@ function TxConfirmationForm(props: Props) {
       ...prevValues,
       [key]: value
     }))
+  }
+
+  const onConfirmDismissal = () => {
+    if (!pendingConfirmation) return
+
+    settings.ignoreSignatureRequest(pendingConfirmation.hash)
+    setPendingConfirmation(null)
+
+    if (props.onDismiss) {
+      props.onDismiss()
+    }
   }
 
   const onSubmit = (event: React.SyntheticEvent) => {
@@ -81,6 +98,16 @@ function TxConfirmationForm(props: Props) {
           />
         ) : null}
         <DialogActionsBox desktopStyle={{ justifyContent: "center" }}>
+          {props.signatureRequest ? (
+            <ActionButton
+              icon={<CloseIcon />}
+              onClick={() => setPendingConfirmation(props.signatureRequest ? props.signatureRequest : null)}
+            >
+              Dismiss
+            </ActionButton>
+          ) : (
+            undefined
+          )}
           {props.disabled ? null : (
             <ActionButton icon={<CheckIcon />} onClick={() => undefined} type="submit">
               Confirm
@@ -88,6 +115,19 @@ function TxConfirmationForm(props: Props) {
           )}
         </DialogActionsBox>
       </VerticalLayout>
+      <ConfirmDialog
+        cancelButton={<ActionButton onClick={() => setPendingConfirmation(null)}>Cancel</ActionButton>}
+        confirmButton={
+          <ActionButton onClick={onConfirmDismissal} type="primary">
+            Confirm
+          </ActionButton>
+        }
+        onClose={() => setPendingConfirmation(null)}
+        open={pendingConfirmation !== null}
+        title="Confirm dismissal"
+      >
+        Dismiss pending multi-signature transaction?
+      </ConfirmDialog>
     </form>
   )
 }

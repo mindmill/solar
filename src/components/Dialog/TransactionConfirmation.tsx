@@ -64,6 +64,7 @@ function TxConfirmationDialog(props: TxConfirmationDialogProps) {
                 account={props.account}
                 disabled={props.disabled}
                 onConfirm={formValues => props.onSubmitTransaction(props.transaction as Transaction, formValues)}
+                onDismiss={props.onClose}
                 passwordError={props.passwordError}
                 signatureRequest={props.signatureRequest}
                 transaction={props.transaction}
